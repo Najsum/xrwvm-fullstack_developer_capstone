@@ -41,6 +41,46 @@ let checkSession = ()=>{
     '<a class="homepage_links"  href="/register">Register</a>'
   }
  }
+
+const getCars = async () => {
+  const results = document.getElementById("cars-results");
+  results.replaceChildren();
+
+  try {
+    const response = await fetch("/djangoapp/get_cars");
+    if (!response.ok) {
+      throw new Error("Could not load cars.");
+    }
+
+    const data = await response.json();
+    const cars = data.CarModels || [];
+    if (cars.length === 0) {
+      results.textContent = "No cars have been added yet.";
+      return;
+    }
+
+    const table = document.createElement("table");
+    table.className = "table table-striped";
+    const header = table.createTHead().insertRow();
+    ["Make", "Model"].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      header.appendChild(cell);
+    });
+
+    const body = table.createTBody();
+    cars.forEach((car) => {
+      const row = body.insertRow();
+      [car.CarMake, car.CarModel].forEach((value) => {
+        row.insertCell().textContent = value;
+      });
+    });
+    results.appendChild(table);
+  } catch (error) {
+    results.textContent = "Unable to load cars. Please try again.";
+  }
+};
   
 </script>
 </head>
@@ -79,5 +119,11 @@ let checkSession = ()=>{
   </div>
 </div>
 </div>
+<section class="container" style="max-width: 900px; margin: 32px auto;">
+  <h3>Cars</h3>
+  <p>Select the <strong>Get Cars</strong> button below to check the list of cars added.</p>
+  <button type="button" class="btn btn-primary" onclick="getCars()">Get Cars</button>
+  <div id="cars-results" aria-live="polite" style="margin-top: 16px;"></div>
+</section>
 </body>
 </html>
